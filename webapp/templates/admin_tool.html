@@ -1,0 +1,31 @@
+{% extends "base/base_template.html" %}
+{% load static from staticfiles %}
+{% block extra_css %}
+{% endblock extra_css %}
+
+{% block extra_js %}
+
+{% endblock %}
+{% block page_content %}
+<div class="row vertical_indent50"></div>
+              {% if request.user.is_superuser %}
+{{ request.path }}
+{{ request.get_full_path }}
+                    <table class="table">
+
+                      <tbody>
+                      {%for log_item in logs%}
+                        <tr>
+                            <td style="width:16%;"><left>{{log_item.date_added}}</left></td>
+                            <td style="width:16%;"><left><a href="{% url 'counters_info' %}?id={{log_item.user_id}}">{{log_item.user_id}}</a></left></td>
+                            <td style="width:16%;"><left>{{log_item.msg_source}}</left></td>
+                            <td style="width:16%;"><left>{{log_item.msg_type}}</left></td>
+                            <td style="width:16%;"><left>{{log_item.msg}}</left></td>
+                        </tr>
+                      {%endfor%}
+                      </tbody>
+                    </table>
+              {% else %}
+              {% endif %}
+<div class="row vertical_indent10"></div>
+{% endblock %}

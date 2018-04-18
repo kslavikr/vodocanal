@@ -1,0 +1,321 @@
+{% extends "base/base_template.html" %}
+{% load static from staticfiles %}
+{% block extra_css %}
+<style>
+  .counter_val_box{
+    padding: 5px;
+    border-color: black;
+    max-height: 210px;
+    overflow: auto;
+  }
+</style>
+{% endblock extra_css %}
+
+{% block extra_js %}
+<script src='https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.20/pdfmake.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.20/vfs_fonts.js'></script>
+{% load month_ukrainian %}
+<script>
+
+function testPDF() {
+
+// playground requires you to assign document definition to a variable called dd
+var size_f=10;
+var pib = "{{bill_info.user_name}}";
+var adresa =  'Адреса :\n'+ "{{bill_info.addres}}";
+var summa_borg = -1*"{%if bill_info.payment%}{%if bill_info.payment.to_pay < 0%}{{bill_info.payment.to_pay}}{%else%}0{%endif%}{%else%}0{%endif%}";
+var borg = 'Рекомендовано до оплати: '+ summa_borg+' грн';
+var povidoml = 'Повідомлення від: '+ '{{bill_info.payment.date_added|date:"d.m.Y"}}';
+var period = '{{bill_info.calc_payment.date_added|month_ukrainian}}';
+var za_period = 'За період - ' + period + '\n\n';
+
+var pokazu_counters = "Дані по лічильникам: \n";
+var pokazu_text="";
+var q=0;
+{%for counters in bill_info.counters%}
+pokazu_text += "Лічильник №{{counters.contract.contract_descr}} ({{counters.contract.contract_id}})\n";
+pokazu_text += "покази на початок періоду: {{counters.previous_value}}\n";
+pokazu_text += "покази на кінець періоду: {{counters.current_value}}\n";
+q="{{counters.current_value}}"-"{{counters.previous_value}}";
+pokazu_text += "різниця: "+q+" куб.м.\n";
+{%endfor%}
+
+var suma_na_pochatok = '{{bill_info.calc_payment.to_pay}}';
+var text_suma_na_pochatok = 'Сума на початок періоду: '+suma_na_pochatok+' грн.\n';
+var suma_naraxovano = '{{bill_info.calc_payment.calc_to_pay}}';
+var text_suma_naraxovano = 'Нараховано за цей період: '+suma_naraxovano+' грн.\n';
+var suma_oplacheno = '{{bill_info.calc_payment.payed_paid}}';
+var text_suma_oplacheno = 'Всього оплачено за цей період: '+suma_oplacheno+' грн.\n';
+var text_suma_oplacheno_detail = 'з цієї суми було оплачено: \n'
+var suma_oplacheno_pilgy = '{{bill_info.calc_payment.payed_paid_pilgy}}';
+var text_suma_oplacheno_pilgy = 'пільгами: '+suma_oplacheno_pilgy+' грн.\n';
+var suma_oplacheno_subs = '{{bill_info.calc_payment.payed_paid_subs}}';
+var text_suma_oplacheno_sub = '           субсидіями: '+suma_oplacheno_subs+' грн.\n';
+var suma_oplacheno_user = '{{bill_info.calc_payment.payed_paid_user}}';
+var text_suma_oplacheno_user = '           споживачем: '+suma_oplacheno_user+' грн.\n';
+var text_suma_comment = '(Сума з мінусом - заборгованість,\n з плюсом - переплата)\n';
+var dd = {
+pageSize:'A4',
+pageOrientation:'portrait',
+pageMargins:[50,50,30,60],
+content: [
+		{
+		alignment: 'left',
+		columns: [{
+						width:230,
+						stack: [
+							{text: povidoml+'\n',bold: true,fontSize: size_f},
+							{text: 'Одержувач КП«Дрогобичводоканал»\n',bold: true, fontSize: size_f},
+							{text: 'Особовий рахунок № '+"{{bill_info.user_id}}"+'\n',bold: true, fontSize: size_f+1},
+							{text: pib+'\n\n',bold: true, fontSize: size_f+1},
+							{text: adresa+'\n\n',bold: true, fontSize: size_f},
+							{text: 'Послуги за водопостачання \nта водовідведення\n',bold: true, fontSize: size_f},
+							{text: za_period, fontSize: size_f,bold: true},
+							{text: pokazu_counters, fontSize: size_f},
+                            {text: pokazu_text+"\n", fontSize: size_f-1},
+							{text: text_suma_na_pochatok, fontSize: size_f,bold: true},
+							{text: text_suma_comment,  fontSize: size_f-1},
+							{text: text_suma_naraxovano, fontSize: size_f,bold: true},
+							{text: text_suma_oplacheno, fontSize: size_f,bold: true},
+							{text: text_suma_oplacheno_detail, fontSize: size_f},
+							{text: text_suma_oplacheno_pilgy, fontSize: size_f-1,alignment: 'right',margin:[0,0,60,0]},
+							{text: text_suma_oplacheno_sub, fontSize: size_f-1,alignment: 'right',margin:[0,0,60,0]},
+							{text: text_suma_oplacheno_user, fontSize: size_f-1,alignment: 'right',margin:[0,0,60,0]},
+							{text: '\n'+borg+'\n', bold: true, fontSize: size_f+1},
+							],
+		},{ 	width:400,
+			stack: [		{alignment: 'left',
+		
+							columns: [
+								{text:[
+							{text: povidoml+'\n',bold: true,fontSize: size_f},
+							{text: 'Одержувач КП«Дрогобичводоканал»\n',bold: true, fontSize: size_f},
+							{text: 'Особовий рахунок № '+"{{bill_info.user_id}}"+'\n',bold: true, fontSize: size_f+1},
+							{text: pib+'\n\n',bold: true, fontSize: size_f+1},
+							{text: adresa+'\n\n',bold: true, fontSize: size_f},
+							{text: 'Послуги за водопостачання \nта водовідведення\n',bold: true, fontSize: size_f},
+							{text: za_period, fontSize: size_f,bold: true},
+							{text: pokazu_counters, fontSize: size_f},
+                            {text: pokazu_text+"\n", fontSize: size_f-1},
+							{text: text_suma_na_pochatok, fontSize: size_f,bold: true},
+							{text: text_suma_comment,  fontSize: size_f-1},
+							{text: text_suma_naraxovano, fontSize: size_f,bold: true},
+							{text: text_suma_oplacheno, fontSize: size_f,bold: true},
+							{text: text_suma_oplacheno_detail, fontSize: size_f},
+							{text: text_suma_oplacheno_pilgy, fontSize: size_f-1,alignment: 'right',margin:[0,0,60,0]},
+							{text: text_suma_oplacheno_sub, fontSize: size_f-1,alignment: 'right',margin:[0,0,60,0]},
+							{text: text_suma_oplacheno_user, fontSize: size_f-1,alignment: 'right',margin:[0,0,60,0]},
+							{text: '\n'+borg+'\n', bold: true, fontSize: size_f+1},
+							] },
+									
+								{table: {
+									body: [
+									['покази лічильників\nподавати з 10 по 28\nчисла поточного\nмісяця.\n'],
+									['р/рах 26002240591\nв АКБ «Львів»\nМФО 325268\nЕДРПО 03348910\n']
+									]}
+								}    ]
+							},{
+							  //  text:{text: (borg+'\n'), bold: true, fontSize: size_f+2}
+							}]}
+			
+		]
+								
+		}
+		  
+							
+			],
+styles: {
+	header: {
+		fontSize: 10,
+		bold: true,
+		margin: [0, 0, 0, 10]
+	},
+	tableExample: {
+		margin: [0, 5, 0, 15]
+	},
+},
+defaultStyle: {
+	fontSize: size_f,
+	// alignment: 'justify'
+}
+
+};
+
+
+
+return pdfMake.createPdf(dd).download('raxunok.pdf');
+};
+
+</script>
+{% endblock %}
+{% block page_content %}
+<div class="row vertical_indent50"></div>
+<div class="row">
+  <div class="col-xs-1"></div>
+  <div class="col-xs-10">
+    <div>
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#counters" aria-controls="counters" role="tab" data-toggle="tab">Показники</a></li>
+        <li role="presentation"><a href="#payments" aria-controls="payments" role="tab" data-toggle="tab">Розрахунки</a></li>
+        <li role="presentation"><a href="#pay" aria-controls="pay" role="tab" data-toggle="tab">Оплата</a></li>
+      </ul>
+      <!-- Tab panes -->
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="counters">
+        {% if counters_info %}
+          <b><h4>Номер лічильника(заводський номер)</h4></b>
+
+          <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            {% for counter in counters_info %}
+            <div class="panel panel-default">
+              <div class="panel-heading" role="tab" id="heading{{counter.contract.contract_id}}">
+                <h4 class="panel-title">
+                  <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{counter.contract.contract_id}}" aria-expanded="true" aria-controls="collapse{{counter.contract.contract_id}}">
+                    <div class="row">
+                      <div class="col-xs-2">
+                        <b>
+                            {%if counter.contract.contract_descr%}{{counter.contract.contract_descr}}{%endif%}
+                            {%if counter.contract.contract_id%}({{counter.contract.contract_id}}){%endif%}
+                        </b>
+                      </div>
+                      <div class="col-xs-3">
+                          Показник Користувача: {%if counter.value.0.value_user%}{{counter.value.0.value_user}}<i>м<sup>3</sup></i>{%else%}-{%endif%}
+                      </div>
+                      <div class="col-xs-3">
+                          Показник Водоканалу: {%if counter.value.0.value_vodocanal%}{{counter.value.0.value_vodocanal}}<i>м<sup>3</sup></i>{%else%}-{%endif%}
+                      </div>
+                      <div class="col-xs-4">
+                          Дата Подання: {{counter.value.0.registration_time|date:'Y-m-d'}}
+                      </div>
+                    </div>
+                  </a>
+                </h4>
+              </div>
+              <div id="collapse{{counter.contract.contract_id}}" class="panel-collapse collapse{%if forloop.counter == 1%} in{%endif%}" role="tabpanel" aria-labelledby="heading{{counter.contract.contract_id}}">
+                <div class="panel-body">
+                        <div align="right">
+                          <!--<div class="row vertical_indent10"></div>-->
+                            {% if allow_add %}
+                              <a href="{% url 'counters_set_val' %}?id={{counter.contract.contract_id}}">
+                                <button class="btn btn-xs btn-primary">Подати показник</button>
+                              </a>
+                            {%else%}
+                                Вносити дані Ваших лічильників необхідно з 10 до 28 числа щомісяця.
+                                <span class="btn btn-xs btn-default" disabled="disabled">Подати показник</span>
+                            {%endif%}
+                          <div class="row vertical_indent10"></div>
+                        </div>
+                        {%if counter.value%}
+                        <div>
+                         <table class="table" style="margin-bottom:0px;">
+                            <thead>
+                              <tr class="active">
+                               <!-- <th style="width:5%;"><center>#</center></th>-->
+                                <th style="width:30%;"><center>Показник від Користувача (<i>м<sup>3</sup></i>)</center></th>
+                                <th style="width:30%;"><center>Показник від Водоканалу (<i>м<sup>3</sup></i>)</center></th>
+                                <th style="width:35%;"><center>Дата Подання</center></th>
+                              </tr>
+                            </thead>
+                          </table>
+                        </div>
+                        <div class="counter_val_box">
+                          <table class="table">
+                            <tbody>
+                              {%for val in counter.value%}
+                              <tr>
+                                <!--<td style="width:5%;"><center>{{forloop.counter}}</center></td>-->
+                                <td style="width:30%;"><center>{%if val.value_user%}{{val.value_user}}{%else%}-{%endif%}</center></td>
+                                <td style="width:30%;"><center>{%if val.value_vodocanal%}{{val.value_vodocanal}}{%else%}-{%endif%}</center></td>
+                                <td style="width:35%;"><center>{{val.registration_time|date:'Y-m-d'}}</center></td>
+                              </tr>
+                              {%endfor%}
+                            </tbody>
+                          </table>
+                        </div>
+                      {%else%}
+                      <center><b>Немає інформації про покази даного лічильника</b></center>
+                      {%endif%}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% else %}
+           <center><b>Немає інформації про покази лічильників</b></center>
+          {% endif %}
+        </div>
+        <div role="tabpanel" class="tab-pane" id="payments">
+          {%if user_payments%}
+          <div class="row">
+            <div class="col-xs-9"></div>
+            <div class="col-xs-3"  align="right">
+              <div class="row vertical_indent10"></div>
+              <button class="btn btn-xs btn-primary" onclick="testPDF()">Завантажити рахунок</button>
+              <div class="row vertical_indent10"></div>
+            </div>
+          </div>
+          
+<div class="panel panel-default">
+  <div class="panel-heading">
+          <center>
+            <table class="table" style="margin-bottom:0px;">
+              <thead>
+                <tr>
+                  <!--<th style="width:5%;" rowspan="2"><center>#</center></th>-->
+                  <th style="width:16%;" rowspan="2"><center>Період (міс.,рік)</center></th>
+                  <th style="width:14%;" rowspan="2"><center>До оплати на початок місяця<h6>Сума з мінусом - заборгованість, з плюсом - переплата</h6></center></th>
+                  <th style="width:14%;" rowspan="2"><center>Нараховано за послуги</center></th>
+                  <th colspan="4"><center>Оплачено</center></th>
+                </tr>
+                <tr>
+                  <!--<th style="width:20%;"><center>(міс.,рік) </center></th>-->
+                  <!--<th style="width:15%;"><center>на початок місяця</center></th>-->
+                  <th style="width:14%;"><center>Споживачем</center></th>
+                  <th style="width:14%;"><center>Субсидіями</center></th>
+                  <th style="width:14%;"><center>Пільгами</center></th>
+                  <th style="width:14%;"><center>Загальна сума</center></th>
+                </tr>
+              </thead>
+            </table>
+          </center> 
+  </div>
+  <div class="panel-body counter_val_box">
+            <table class="table">
+
+              <tbody>
+              {%for payment in user_payments%}
+                <tr>
+                  <!--<td style="width:5%;"><center>{{forloop.counter}}</center></td>-->
+                  <td style="width:16%;"><center>{{payment.date_added|month_ukrainian}}</center></td>
+                  <td style="width:14%;"><center>{%if payment.to_pay%}{{payment.to_pay}}{%else%}-{%endif%}</center></td>
+                  <td style="width:14%;"><center>{%if payment.calc_to_pay%}{{payment.calc_to_pay}}{%else%}-{%endif%}</center></td>				  
+                  <td style="width:14%;"><center>{%if payment.payed_paid_user%}{{payment.payed_paid_user}}{%else%}-{%endif%}</center></td>
+                  <td style="width:14%;"><center>{%if payment.payed_paid_subs%}{{payment.payed_paid_subs}}{%else%}-{%endif%}</center></td>
+                  <td style="width:14%;"><center>{%if payment.payed_paid_pilgy%}{{payment.payed_paid_pilgy}}{%else%}-{%endif%}</center></td>
+                  <td style="width:14%;"><center>{%if payment.payed_paid%}{{payment.payed_paid}}{%else%}-{%endif%}</center></td>
+                </tr>
+              {%endfor%}
+              </tbody>
+            </table>
+  </div>
+</div>
+          {%else%}
+          <center><b>Немає інформації про розрахунки та їх оплату</b></center>
+          {%endif%}
+        </div>
+        <div role="tabpanel" class="tab-pane" id="pay">
+          <div class="row vertical_indent10"></div>
+            <center>Сума до оплати у {{to_pay_info.month}} - {{to_pay_info.to_pay}}грн. 
+              <button class="btn btn-xs btn-default" disabled="disabled">Оплатити онлайн</button>
+            </center>
+          <div class="row vertical_indent10"></div>
+        </div>  
+      </div>
+    </div>
+  </div>
+  <div class="col-xs-1"></div>
+</div>
+<div class="row vertical_indent10"></div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base/base_template.html" %}
+{% load static from staticfiles %}
+{% block page_content %}
+<div class="row vertical_indent50"></div>
+<div class="row">
+  <div class=col-xs-4></div>
+  <div class=col-xs-4>
+    <center><h2>Авторизація Користувача</h2></center>
+    <div class="row vertical_indent50"></div>
+    <form action="" method="post" enctype="multipart/form-data">
+	  {% include "base/form_creator.html" %}	
+	    <input type="submit" class="btn btn-success" value="Підтвердити"/>
+	    <a type="button" class="btn btn-default" href="{% url 'user_registration' %}">Реєстрація</a>
+	    <a href="{% url 'restore_pass' %}">забули пароль?</a>
+	</form>	
+	<div class="row vertical_indent50"></div>
+  </div>
+  <div class=col-xs-4></div>
+</div>
+{% endblock %}

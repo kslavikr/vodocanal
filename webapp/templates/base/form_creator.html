@@ -1,0 +1,44 @@
+{% load static from staticfiles %}
+{% load field_type_tags %}
+<link rel="stylesheet" href={% static "css/basic/form_creator.css" %}></link>
+<div class="whole-form">
+  {% csrf_token %}
+  {% for field in form %}
+  	{% if field|field_type == 'CheckboxInput' %}
+  		<div id="id_field_{{ field.name }}">
+        	<label class="control-label" for="id_{{ field.name }}">
+            	<span style = "position:relative;top:2px;">{{ field.as_widget }}</span>
+            	<text style="margin-right:3px;"></text>
+            	{{ field.label }}
+    		</label>
+            <h6 class="help-block">{{ field.help_text }}</h6>
+        </div>
+        <div class="error-form-field">
+            {% for error in field.errors %}
+              <h6>{{ error }}</h6>
+            {% endfor %}
+        </div>
+  	{% else %}
+    {% if field in form.visible_fields %}
+      <div id="id_field_{{ field.name }}">
+        <fieldset class="form-group">
+          <label class="control-label" for="id_{{ field.name }}">
+            {{ field.label }}
+          </label>
+          <div class="error-form-field">
+            {% for error in field.errors %}
+              <h6>{{ error }}</h6>
+            {% endfor %}
+          </div>
+          <div>
+            {{ field.as_widget }}
+            <h6 class="help-block">{{ field.help_text }}</h6>
+          </div>
+        </fieldset>
+      </div>
+    {% else %}
+      {{ field.as_widget }}
+    {% endif %}
+    {% endif %}
+  {% endfor %}
+</div>

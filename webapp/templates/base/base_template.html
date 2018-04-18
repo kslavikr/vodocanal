@@ -1,0 +1,183 @@
+{% load static from staticfiles %}
+<!DOCTYPE html>
+<html lan="en">
+<head>
+  <meta content="text/html"></meta>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1" />
+  <title>VodoCanal | {% block head_title %}{% endblock %}</title>
+  <!-- Start CSS Connections -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"></link>
+  <style>
+
+  .container{
+    width:auto;
+    min-height: 100%;
+    
+  }
+  .header{
+    padding: 0px 30px 0px 30px;
+    background-color: lightblue;
+  }
+  .footer{
+    padding: 0px 30px 0px 30px;
+    background-color: lightblue;
+    height: 50px;
+    text-align: center;
+  }
+  #logo{
+    margin:20px;
+  }
+  .user_info{
+    padding-top:25px;
+  }
+  .vertical_indent10{
+    height:10px;
+  }
+  .vertical_indent30{
+    height:30px;
+  }
+  .vertical_indent50{
+    height:50px;
+  }
+  .vertical_indent100{
+    height:100px;
+  }
+  .error-form-field{
+    color:red;
+  }
+  </style>
+  {% block extra_css %}{% endblock extra_css %}
+  <!-- End CSS Connections -->
+  <!-- Start JQuery Connection -->
+  <!-- End JQuery Connection -->
+  <!-- Start JavaScript Connections -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+  {% block extra_js %}{% endblock %}
+  <!-- End JavaScript Connections -->
+</head>
+<body>
+  <div class="container">
+    <!-- Start Header -->
+    <div class="row header">
+      <div class="col-xs-4">
+        <h1 id="logo">
+          <a href="/">
+            <strong>Дрогобичводоканал</strong>
+          </a>
+        </h1>
+      </div>
+      <div class="col-xs-2"></div>
+      <div class="col-xs-6">
+        <div class="user_info">
+          <div class="row">
+            <div class="col-xs-8">
+              {% if request.user.is_superuser %}
+                В РЕЖИМІ АДМІНІСТРАТОРА (користувач: {{user_identity}})
+              <a href="{% url 'admintool' %}">Панель Логів</a>
+              {% else %}
+                Вітаємо,<strong> {% if request.user.is_authenticated %}{{request.user.first_name}}{% else %} Гість{% endif %}</strong>.</br>
+                {% if user_detail %}
+                  {% if user_detail.street %}вул.{{user_detail.street}}{% endif %}
+                  {% if user_detail.house %} буд.{{user_detail.house}}{% endif %}
+                  {% if user_detail.appartment %} кв.{{user_detail.appartment}}{% endif %}
+                {% endif %}
+              {% endif %}
+            </div>
+            <div class="col-xs-4">
+            {%if request.user.is_authenticated %}
+              <a href="{% url 'user_authorization' %}?logout=logout">Вийти</a> / <a href="{% url 'chenge_pass' %}">Змінити Пароль</a> / 
+              <span class="glyphicon glyphicon-question-sign" data-toggle="modal" data-target="#myModal" style="cursor:pointer"></span>
+            {%else%}<a href="{% url 'user_authorization' %}">Вхід</a> / <a href="{% url 'user_registration' %}">Реєстрація</a>{%endif%}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    {% if messages %}
+      <div class="row vertical-indent"></div>
+      <div class="row">
+        <div class="col-xs-12">
+          {% for message in messages %}
+            {% if message.level_tag == "success" %}
+              <div class="alert alert-success alert_close_on_click" role="alert">
+                <b>Well done! </b>{{ message|safe }}
+              </div>
+            {% elif message.level_tag == "warning" %}
+              <div class="alert alert-warning alert_close_on_click" role="alert">
+                <b>Warning! </b>{{ message|safe }}
+              </div>
+            {% elif message.level_tag == "error" %}
+              <div class="alert alert-danger alert_close_on_click" role="alert">
+                <b>Error! </b>{{ message|safe }}
+              </div>
+            {% elif message.level_tag == "info" %}
+              <div class="alert alert-info alert_close_on_click" role="alert">
+                <b>Info: </b>{{ message|safe }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+    
+    <div style="min-height: 550px">{% block page_content %}{% endblock %}</div>
+    <div class="row vertical-indent100"></div>
+    <div class="row footer">
+      <div style="padding-top: 15px;">
+        Powered by Team
+      </div>
+    </div>
+  </div>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div align="justify">
+          <center><h3><b>УВАГА!</b> Сервіс передачі показників лічильника працює у тестовому режимі.</h3></center>
+          <center><h4>Користування сервісом <b>безплатне!!!</b></h4></center>
+           
+          <p>За допомогою  онлайн-сервісу споживачі водопостачання та водовідведення мають можливість подавати показники лічильників холодної води. Наразі послуга доступна лише для фізичних осіб.</p>
+          <p>Вносити дані Ваших лічильників необхідно з 20 до 28 числа щомісяця.</p>
+          <p>Для подання показів водоміра споживач має здійснити реєстрацію. Для цього необхідно:</p>
+          <ul style="list-style-type:circle">
+            <li>Бути власником електронної поштової скриньки (бажано на поштових сервісах України).</li>
+            <li>Знати заборгованість/переплату за спожиті послуги на початок попереднього місяця.</li>
+            <li>Знати свій особовий рахунок споживача (номер контракту).</li>
+          </ul>
+          <div style="margin-left:25px;">
+          <b>Кроки реєстрації:</b>
+          <ul style="list-style-type:circle">
+            <li>На головній сторінці офіційного сайту підприємства натиснути позначку «Комірка споживача».</li>
+            <li>На відкритій сторінці натиснути позначку «Реєстрація».</li>
+            <li>Зазначити дані у відповідних комірках (особовий рахунок, електронну скриньку, заборгованість на початок місяця). 
+            Заборгованість вводиться зі знаком «-», а у разі переплати без будь-яких знаків. 
+            Інформація вводиться з двома знаками після крапки. 
+            Інформцію про заборгованість можливо отримати з квитанції за спожиті послуги. При цьому не треба враховувати суму рекомендованого платежу. 
+            Після заповнення всіх комірок натиснути позначку «Підтвердити».</li>
+            <li>У разі правильного заповнення комірок на електронну скриньку споживача надійде  лист з паролем. Лист може бути розцінений як спам, що залежить від налаштувань електронної пошти.</li>
+          </ul>
+          <b>Вхід до сервісу:</b>
+          <ul style="list-style-type:circle">
+            <li>Після отримання паролю на головній сторінці сервісу ввести номер особового рахунку та отриманий пароль.</li>
+            <li>Після введення даних натиснути позначку «Вхід».</li>
+          </ul>
+          <b>Введення показників:</b>
+            <p>За наявності в одного споживача двох лічильників слід зазначити покази кожного з них та натиснути позначку «Підтвердити».</p>
+          </div>
+          
+          У разі виникнення будь-яких запитань  щодо реєстрації, введення показів, роботи сервісу просимо звертатись:</br>
+          за електронною адресою: <b><i>pokazvodu@meta.ua</i></b></br>
+          за телефоном служби збуту: <b><i>(03244)2-40-31, +380972814728</i></b>
+          <p><h5>Додатково інформуємо, що найближчим часом буде створена можливість здійснювати плату за спожиті послуги безпосередньо на сервісі.</h5></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
